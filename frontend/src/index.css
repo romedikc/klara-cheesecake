@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Design tokens. Colors/fonts are exposed to Tailwind via tailwind.config.js
+     (e.g. bg-accent, text-ink, font-serif), so components use utilities only. */
+  :root {
+    --paper: #faf6ef;
+    --cream: #f3ece0;
+    --beige: #e7dccb;
+    --ink: #2b2520;
+    --ink-soft: #6a5f53;
+    --line: #ddd1bf;
+    --accent: oklch(0.63 0.16 55);
+    --accent-deep: color-mix(in srgb, var(--accent), #000 18%);
+    --blush: oklch(0.96 0.03 70);
+    --serif: "Cormorant Garamond", Georgia, serif;
+    --sans: "Hanken Grotesk", system-ui, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+}
