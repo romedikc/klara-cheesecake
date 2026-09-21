@@ -1,13 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.cakes.models import (
-    Cheesecake, CheesecakeCategory, CheesecakeImage, CheesecakeTagLabel,
-    CheesecakeVariant,
-)
-from apps.common.models import SiteSettings
-from apps.courses.models import Course, CourseInclusion, CourseLevel, CourseTag, Lesson, Module
-from apps.payments.models import PaymentProvider
+from ....cakes.models import CheesecakeCategory, CheesecakeTagLabel, Cheesecake, CheesecakeImage, CheesecakeVariant
+from ....common.models import SiteSettings
 
 
 class Command(BaseCommand):
@@ -68,70 +63,73 @@ class Command(BaseCommand):
             )
             if created:
                 CheesecakeImage.objects.create(cheesecake=cake, image=image_url, is_primary=True)
-                CheesecakeVariant.objects.create(cheesecake=cake, name="Small", portion_note="4-6 servings", price_delta=0)
-                CheesecakeVariant.objects.create(cheesecake=cake, name="Medium", portion_note="8-10 servings", price_delta=0, is_default=True)
-                CheesecakeVariant.objects.create(cheesecake=cake, name="Large", portion_note="14-16 servings", price_delta=600)
+                CheesecakeVariant.objects.create(cheesecake=cake, name="Small", portion_note="4-6 servings",
+                                                 price_delta=0)
+                CheesecakeVariant.objects.create(cheesecake=cake, name="Medium", portion_note="8-10 servings",
+                                                 price_delta=0, is_default=True)
+                CheesecakeVariant.objects.create(cheesecake=cake, name="Large", portion_note="14-16 servings",
+                                                 price_delta=600)
 
-    def _seed_courses(self):
-        tag_names = ["New York style", "No-bake", "Japanese", "Basque", "Texture", "Plating"]
-        tags = {name: CourseTag.objects.get_or_create(name=name)[0] for name in tag_names}
-
-        courses_data = [
-            dict(title="Cheesecake Fundamentals", level=CourseLevel.BEGINNER, price=6900, old_price=9900,
-                 short_description="Master four classic styles and stop fighting cracks.",
-                 cover_image="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=900&q=80",
-                 tags=["New York style", "No-bake", "Japanese", "Basque"],
-                 modules=[("Introduction & ingredients", ["Welcome to the course", "Choosing cream cheese",
-                                                           "Tools & equipment", "Ingredient temperature - the big secret"]),
-                          ("New York classic", ["Graham cracker crust", "Mixing the filling", "Water bath & baking",
-                                                 "Cooling & slicing", "Troubleshooting"])]),
-            dict(title="The Perfect Basque", level=CourseLevel.INTERMEDIATE, price=8900,
-                 short_description="Texture, timing, and that caramelized crust.",
-                 cover_image="https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=900&q=80",
-                 tags=["Basque", "Texture"],
-                 modules=[("Why high heat works", ["The science of the crust", "Batter & pan prep"])]),
-            dict(title="Plating & Seasonal Flavors", level=CourseLevel.ADVANCED, price=11900,
-                 short_description="Restaurant-style plating, glazes, and fruit work.",
-                 cover_image="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=900&q=80",
-                 tags=["Plating"],
-                 modules=[("Mirror glaze basics", ["Tempering", "Pouring technique"])]),
-            dict(title="Sell From Your Kitchen", level=CourseLevel.BUSINESS, price=9900,
-                 short_description="Pricing, packaging, and delivery for a home bakery.",
-                 cover_image="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=900&q=80",
-                 tags=[],
-                 modules=[("Getting your first customers", ["Pricing your bakes", "Packaging on a budget"])]),
-        ]
-
-        for data in courses_data:
-            modules = data.pop("modules")
-            tag_list = data.pop("tags")
-            course, created = Course.objects.get_or_create(
-                title=data["title"], defaults={**data, "description": data["short_description"]},
-            )
-            if created:
-                course.tags.set([tags[t] for t in tag_list])
-                for i, (module_title, lessons) in enumerate(modules):
-                    module = Module.objects.create(course=course, title=module_title, sort_order=i)
-                    for j, lesson_title in enumerate(lessons):
-                        Lesson.objects.create(
-                            module=module, title=lesson_title, sort_order=j,
-                            duration_seconds=420, is_free_preview=(i == 0 and j < 2),
-                        )
-                for i, text in enumerate([
-                    "Video lessons with lifetime access", "Printable PDF recipes",
-                    "Access on phone and desktop", "Private student chat",
-                    "Certificate of completion",
-                ]):
-                    CourseInclusion.objects.create(course=course, text=text, sort_order=i)
-
-    def _seed_payment_providers(self):
-        PaymentProvider.objects.get_or_create(
-            key="card_gateway",
-            defaults=dict(display_name="Bank Card", description="Visa/Mastercard via hosted checkout",
-                          icon="💳", sort_order=1),
-        )
-        PaymentProvider.objects.get_or_create(
-            key="local_gateway",
-            defaults=dict(display_name="Local Payment System", description="Local e-wallet / QR payment",
-                          icon="📱", sort_order=2),
-        )
+    # def _seed_courses(self):
+    #     tag_names = ["New York style", "No-bake", "Japanese", "Basque", "Texture", "Plating"]
+    #     tags = {name: CourseTag.objects.get_or_create(name=name)[0] for name in tag_names}
+    #
+    #     courses_data = [
+    #         dict(title="Cheesecake Fundamentals", level=CourseLevel.BEGINNER, price=6900, old_price=9900,
+    #              short_description="Master four classic styles and stop fighting cracks.",
+    #              cover_image="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=900&q=80",
+    #              tags=["New York style", "No-bake", "Japanese", "Basque"],
+    #              modules=[("Introduction & ingredients", ["Welcome to the course", "Choosing cream cheese",
+    #                                                        "Tools & equipment", "Ingredient temperature - the big secret"]),
+    #                       ("New York classic", ["Graham cracker crust", "Mixing the filling", "Water bath & baking",
+    #                                              "Cooling & slicing", "Troubleshooting"])]),
+    #         dict(title="The Perfect Basque", level=CourseLevel.INTERMEDIATE, price=8900,
+    #              short_description="Texture, timing, and that caramelized crust.",
+    #              cover_image="https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=900&q=80",
+    #              tags=["Basque", "Texture"],
+    #              modules=[("Why high heat works", ["The science of the crust", "Batter & pan prep"])]),
+    #         dict(title="Plating & Seasonal Flavors", level=CourseLevel.ADVANCED, price=11900,
+    #              short_description="Restaurant-style plating, glazes, and fruit work.",
+    #              cover_image="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=900&q=80",
+    #              tags=["Plating"],
+    #              modules=[("Mirror glaze basics", ["Tempering", "Pouring technique"])]),
+    #         dict(title="Sell From Your Kitchen", level=CourseLevel.BUSINESS, price=9900,
+    #              short_description="Pricing, packaging, and delivery for a home bakery.",
+    #              cover_image="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=900&q=80",
+    #              tags=[],
+    #              modules=[("Getting your first customers", ["Pricing your bakes", "Packaging on a budget"])]),
+    #     ]
+    #
+    #     for data in courses_data:
+    #         modules = data.pop("modules")
+    #         tag_list = data.pop("tags")
+    #         course, created = Course.objects.get_or_create(
+    #             title=data["title"], defaults={**data, "description": data["short_description"]},
+    #         )
+    #         if created:
+    #             course.tags.set([tags[t] for t in tag_list])
+    #             for i, (module_title, lessons) in enumerate(modules):
+    #                 module = Module.objects.create(course=course, title=module_title, sort_order=i)
+    #                 for j, lesson_title in enumerate(lessons):
+    #                     Lesson.objects.create(
+    #                         module=module, title=lesson_title, sort_order=j,
+    #                         duration_seconds=420, is_free_preview=(i == 0 and j < 2),
+    #                     )
+    #             for i, text in enumerate([
+    #                 "Video lessons with lifetime access", "Printable PDF recipes",
+    #                 "Access on phone and desktop", "Private student chat",
+    #                 "Certificate of completion",
+    #             ]):
+    #                 CourseInclusion.objects.create(course=course, text=text, sort_order=i)
+    #
+    # def _seed_payment_providers(self):
+    #     PaymentProvider.objects.get_or_create(
+    #         key="card_gateway",
+    #         defaults=dict(display_name="Bank Card", description="Visa/Mastercard via hosted checkout",
+    #                       icon="💳", sort_order=1),
+    #     )
+    #     PaymentProvider.objects.get_or_create(
+    #         key="local_gateway",
+    #         defaults=dict(display_name="Local Payment System", description="Local e-wallet / QR payment",
+    #                       icon="📱", sort_order=2),
+    #     )
