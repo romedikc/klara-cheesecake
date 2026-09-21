@@ -12,8 +12,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self._seed_site_settings()
         self._seed_cheesecakes()
-        self._seed_courses()
-        self._seed_payment_providers()
+        # self._seed_courses()
+        # self._seed_payment_providers()
         self.stdout.write(self.style.SUCCESS("Demo data seeded."))
 
     def _seed_site_settings(self):
